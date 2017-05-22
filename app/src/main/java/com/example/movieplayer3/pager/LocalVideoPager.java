@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -41,11 +42,18 @@ public class LocalVideoPager extends BaseFragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MediaItem item = list.get(position);
-                String data = item.getData();
+//                MediaItem item = list.get(position);
+//                String data = item.getData();
+//                Intent intent = new Intent(context,LocalVideoPlayerActivity.class);
+//                intent.setDataAndType(Uri.parse(data),"video/*");
+//                startActivity(intent);
                 Intent intent = new Intent(context,LocalVideoPlayerActivity.class);
-                intent.setDataAndType(Uri.parse(data),"video/*");
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("videoList",list);
+                intent.putExtras(bundle);
+                intent.putExtra("position",position);
                 startActivity(intent);
+
             }
         });
 

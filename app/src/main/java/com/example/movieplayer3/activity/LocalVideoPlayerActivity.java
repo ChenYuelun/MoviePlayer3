@@ -9,18 +9,43 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.movieplayer3.R;
+import com.example.movieplayer3.domain.MediaItem;
+
+import java.util.ArrayList;
 
 public class LocalVideoPlayerActivity extends AppCompatActivity {
 private VideoView videoview;
+    private ArrayList<MediaItem> mediaItems;
+    private int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_video_player);
         videoview = (VideoView)findViewById(R.id.videoview);
-        Intent intent = getIntent();
-        Uri data = intent.getData();
-        videoview.setVideoURI(data);
+        getData();
 
+        setListener();
+        setData();
+
+
+
+    }
+
+    private void setData() {
+        if(mediaItems!= null && mediaItems.size() > 0) {
+            MediaItem mediaItem = mediaItems.get(position);
+            videoview.setVideoPath(mediaItem.getData());
+        }
+
+    }
+
+    private void getData() {
+        Intent intent = getIntent();
+        mediaItems = (ArrayList<MediaItem>) intent.getSerializableExtra("videoList");
+        position = intent.getIntExtra("position",0);
+    }
+
+    private void setListener() {
         videoview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -44,8 +69,5 @@ private VideoView videoview;
                 finish();
             }
         });
-
-
-
     }
 }
