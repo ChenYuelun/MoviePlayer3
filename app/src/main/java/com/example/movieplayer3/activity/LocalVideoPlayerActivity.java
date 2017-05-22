@@ -33,6 +33,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static android.R.attr.breadCrumbShortTitle;
+import static android.R.attr.key;
+
 
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int PROCESS = 1;
@@ -299,6 +302,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
 
+                break;
+            case KeyEvent.KEYCODE_BACK:
+                finish();
                 break;
         }
 
