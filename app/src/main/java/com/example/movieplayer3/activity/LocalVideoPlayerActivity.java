@@ -64,6 +64,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private int duration;
     private boolean isShowMediaController = true;
     private MyBroadCastReceiver receiver;
+    private Uri uri;
 
     /**
      * Find the Views in the layout<br />
@@ -210,12 +211,17 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             MediaItem mediaItem = mediaItems.get(position);
             tvName.setText(mediaItem.getName());
             videoview.setVideoPath(mediaItem.getData());
+        }else if(uri != null){
+
+                videoview.setVideoURI(uri);
+
         }
 
     }
 
     private void getData() {
         Intent intent = getIntent();
+        uri = intent.getData();
         mediaItems = (ArrayList<MediaItem>) intent.getSerializableExtra("videoList");
         position = intent.getIntExtra("position", 0);
     }
@@ -337,6 +343,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 btnNext.setBackgroundResource(R.drawable.btn_next_gray);
                 btnNext.setEnabled(false);
             }
+        }else if(uri != null) {
+
+            setEnable(false);
         }
     }
 
@@ -344,7 +353,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         if (b) {
             btnPre.setBackgroundResource(R.drawable.btn_pre_selector);
             btnNext.setBackgroundResource(R.drawable.btn_next_selector);
-        } else {
+        } else  {
             btnPre.setBackgroundResource(R.drawable.btn_pre_gray);
             btnNext.setBackgroundResource(R.drawable.btn_next_gray);
         }

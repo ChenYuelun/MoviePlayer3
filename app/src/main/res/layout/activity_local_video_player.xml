@@ -8,7 +8,7 @@
     tools:context="com.example.movieplayer3.activity.LocalVideoPlayerActivity">
 
 
-    <VideoView
+    <com.example.movieplayer3.view.VideoView
         android:id="@+id/videoview"
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
