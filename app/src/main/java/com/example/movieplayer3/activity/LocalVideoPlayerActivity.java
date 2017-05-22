@@ -3,8 +3,13 @@ package com.example.movieplayer3.activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,11 +21,16 @@ import android.widget.VideoView;
 
 import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
+import com.example.movieplayer3.utils.Utils;
 
 import java.util.ArrayList;
 
+import static android.R.attr.process;
+
+
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
-private VideoView videoview;
+    private static final int PROCESS = 1;
+    private VideoView videoview;
     private ArrayList<MediaItem> mediaItems;
     private int position;
 
@@ -41,6 +51,9 @@ private VideoView videoview;
     private Button btnStartPause;
     private Button btnNext;
     private Button btnSwitchScreen;
+    private GestureDetector detector;
+    private Utils utils;
+    private int duration;
 
     /**
      * Find the Views in the layout<br />
@@ -90,6 +103,7 @@ private VideoView videoview;
         } else if ( v == btnSwitchPlayer ) {
             // Handle clicks for btnSwitchPlayer
         } else if ( v == btnExit ) {
+            finish();
             // Handle clicks for btnExit
         } else if ( v == btnPre ) {
             // Handle clicks for btnPre
@@ -101,14 +115,31 @@ private VideoView videoview;
             // Handle clicks for btnSwitchScreen
         }
     }
+    
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case PROCESS :
+                    int currentPosition = videoview.getCurrentPosition();
+                    seekbarVideo.setProgress(currentPosition);
+                    tvCurrentTime.setText(utils.stringForTime(currentPosition));
+                    sendEmptyMessageDelayed(PROCESS,1000);
 
+                    break;
+            }
+            
+        }
+    };
+
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         findViews();
         getData();
-
+        initData();
         setListener();
         setData();
 
@@ -116,9 +147,20 @@ private VideoView videoview;
 
     }
 
+    private void initData() {
+        utils = new Utils();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
+    
+
     private void setData() {
         if(mediaItems!= null && mediaItems.size() > 0) {
             MediaItem mediaItem = mediaItems.get(position);
+            tvName.setText(mediaItem.getName());
             videoview.setVideoPath(mediaItem.getData());
         }
 
@@ -134,7 +176,12 @@ private VideoView videoview;
         videoview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                duration = videoview.getDuration();
+                tvDuration.setText(utils.stringForTime(duration));
+                seekbarVideo.setMax(duration);
                 videoview.start();
+                handler.sendEmptyMessage(PROCESS);
+                
             }
         });
 
