@@ -30,7 +30,7 @@
         <activity
             android:name=".activity.LocalVideoPlayerActivity"
             android:screenOrientation="landscape"
-            android:theme="@style/MyPlayer">
+            android:theme="@style/noAnimation_Theme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -282,6 +282,7 @@
         <activity android:name=".activity.VitamioVideoPlayerActivity"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
+            android:theme="@style/noAnimation_Theme"
             ></activity>
     </application>
 
