@@ -402,12 +402,12 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                handler.removeMessages(HIDEMEDIACONTROLLER);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
             }
         });
 
