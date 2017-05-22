@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -86,6 +87,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     
     private boolean isNetUri;
 
+    private LinearLayout ll_buffering;
+    private TextView tv_net_speed;
+
     /**
      * Find the Views in the layout<br />
      * <br />
@@ -111,6 +115,8 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         btnStartPause = (Button) findViewById(R.id.btn_start_pause);
         btnNext = (Button) findViewById(R.id.btn_next);
         btnSwitchScreen = (Button) findViewById(R.id.btn_switch_screen);
+        ll_buffering = (LinearLayout)findViewById(R.id.ll_buffering);
+        tv_net_speed = (TextView)findViewById(R.id.tv_net_speed);
 
         btnVoice.setOnClickListener(this);
         btnSwitchPlayer.setOnClickListener(this);
@@ -410,6 +416,25 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
             }
         });
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            videoview.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                @Override
+                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                    switch (what) {
+                        case MediaPlayer.MEDIA_INFO_BUFFERING_START :
+                            ll_buffering.setVisibility(View.VISIBLE);
+                            break;
+                        case MediaPlayer.MEDIA_INFO_BUFFERING_END :
+                            ll_buffering.setVisibility(View.GONE);
+                            break;
+                    }
+
+                    return false;
+                }
+            });
+        }
 
 
     }
