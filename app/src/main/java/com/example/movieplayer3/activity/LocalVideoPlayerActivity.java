@@ -11,6 +11,7 @@ import android.os.Message;
 import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -21,11 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.utils.Utils;
+import com.example.movieplayer3.view.VideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,6 +66,16 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private boolean isShowMediaController = true;
     private MyBroadCastReceiver receiver;
     private Uri uri;
+
+    private boolean isFullScreen = true;
+
+    private int screenWidth;
+    private int screenHeight;
+
+    private int videoWidth;
+    private int videoHeight;
+    private final  int DEFUALT_SCREEN =3;
+    private final  int FULL_SCREEN = 4;
 
     /**
      * Find the Views in the layout<br />
@@ -126,6 +137,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             playNextVideo();
             // Handle clicks for btnNext
         } else if (v == btnSwitchScreen) {
+            SetScreenType();
             // Handle clicks for btnSwitchScreen
         }
     }
@@ -186,7 +198,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-
+                SetScreenType();
                 return super.onDoubleTap(e);
             }
 
@@ -196,6 +208,11 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 return super.onSingleTapConfirmed(e);
             }
         });
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        screenHeight = metrics.heightPixels;
+        screenWidth = metrics.widthPixels;
     }
 
 
@@ -230,11 +247,14 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         videoview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                videoWidth = mp.getVideoWidth();
+                videoHeight = mp.getVideoHeight();
                 duration = videoview.getDuration();
                 tvDuration.setText(utils.stringForTime(duration));
                 seekbarVideo.setMax(duration);
                 videoview.start();
                 setButtonStatus();
+                SetScreenType();
                 hideOrShowMediaController();
                 handler.sendEmptyMessage(PROCESS);
                 handler.sendEmptyMessage(NEWTIME);
@@ -391,6 +411,42 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             isShowMediaController = true;
             handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
         }
+    }
+
+    private void SetScreenType() {
+        if(isFullScreen) {
+            setVideoType(DEFUALT_SCREEN);
+        }else {
+            setVideoType(FULL_SCREEN);
+        }
+    }
+
+    private void setVideoType(int VideoType) {
+        switch (VideoType) {
+            case DEFUALT_SCREEN:
+                isFullScreen = false;
+                btnSwitchScreen.setBackgroundResource(R.drawable.btn_switch_screen_full_selector);
+                int mVideoWidth = videoWidth;
+                int mVideoHeight = videoHeight;
+
+                int width = screenWidth;
+                int height = screenHeight;
+
+                if (mVideoWidth * height < width * mVideoHeight) {
+                    width = height * mVideoWidth / mVideoHeight;
+                } else if (mVideoWidth * height > width * mVideoHeight) {
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+                videoview.setVideoSize(width, height);
+                break;
+            case FULL_SCREEN:
+                isFullScreen = true;
+                btnSwitchScreen.setBackgroundResource(R.drawable.btn_switch_screen_default_selector);
+                videoview.setVideoSize(screenWidth, screenHeight);
+
+                break;
+        }
+
     }
 
     @Override
