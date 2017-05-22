@@ -231,12 +231,40 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         currentVoice= am.getStreamVolume(AudioManager.STREAM_MUSIC);
         seekbarVoice.setMax(maxVoice);
+        seekbarVoice.setProgress(currentVoice);
     }
 
+    private float startY;
+    private float newY;
+    private int touchRang;
+    private int mVocie;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         detector.onTouchEvent(event);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN :
+                startY = event.getY();
+                touchRang = Math.min(screenHeight,screenWidth);
+                mVocie = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+                handler.removeMessages(HIDEMEDIACONTROLLER);
+                break;
+            case MotionEvent.ACTION_MOVE :
+                newY = event.getY();
+                float distanceY = startY - newY;
+                int changVoice = (int) ((distanceY/touchRang) * maxVoice);
+                if(changVoice != 0) {
+                    int voice = Math.min((Math.max(mVocie+changVoice,0)),maxVoice);
+                    updataVoice(voice);
+                }
+
+                break;
+            case MotionEvent.ACTION_UP :
+                handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER,5000);
+                break;
+        }
+
+
         return super.onTouchEvent(event);
     }
 
