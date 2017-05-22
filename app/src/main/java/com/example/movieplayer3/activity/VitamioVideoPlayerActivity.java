@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -28,22 +26,22 @@ import android.widget.Toast;
 import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.utils.Utils;
-import com.example.movieplayer3.view.VideoView;
+import com.example.movieplayer3.view.VitamioVideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.breadCrumbShortTitle;
-import static android.R.attr.key;
+import io.vov.vitamio.MediaPlayer;
+import io.vov.vitamio.Vitamio;
 
 
-public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
+public class VitamioVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int PROCESS = 1;
     private static final int HIDEMEDIACONTROLLER = 2;
     private static final int NEWTIME = 3;
     private static final int SHOW_NET_SPEED = 4;
-    private VideoView videoview;
+    private VitamioVideoView videoview;
     private ArrayList<MediaItem> mediaItems;
     private int position;
 
@@ -101,8 +99,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
      * (http://www.buzzingandroid.com/tools/android-layout-finder)
      */
     private void findViews() {
-        setContentView(R.layout.activity_local_video_player);
-        videoview = (VideoView) findViewById(R.id.videoview);
+        Vitamio.isInitialized(getApplicationContext());
+        setContentView(R.layout.activity_vitamio_video_player);
+        videoview = (VitamioVideoView) findViewById(R.id.videoview);
         llTop = (LinearLayout) findViewById(R.id.ll_top);
         tvName = (TextView) findViewById(R.id.tv_name);
         ivBattery = (ImageView) findViewById(R.id.iv_battery);
@@ -180,7 +179,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case PROCESS:
-                    int currentPosition = videoview.getCurrentPosition();
+                    int currentPosition = (int) videoview.getCurrentPosition();
                     seekbarVideo.setProgress(currentPosition);
                     tvCurrentTime.setText(utils.stringForTime(currentPosition));
                     sendEmptyMessageDelayed(PROCESS, 1000);
@@ -218,7 +217,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                     break;
 
                 case SHOW_NET_SPEED:
-                    String speed = utils.getNetSpeed(LocalVideoPlayerActivity.this);
+                    String speed = utils.getNetSpeed(VitamioVideoPlayerActivity.this);
                     tv_net_speed.setText(speed+"kb/s");
                     tv_loading_net_speed.setText(speed+"kb/s");
                     sendEmptyMessageDelayed(SHOW_NET_SPEED,1000);
@@ -372,7 +371,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             public void onPrepared(MediaPlayer mp) {
                 videoWidth = mp.getVideoWidth();
                 videoHeight = mp.getVideoHeight();
-                duration = videoview.getDuration();
+                duration = (int) videoview.getDuration();
                 tvDuration.setText(utils.stringForTime(duration));
                 seekbarVideo.setMax(duration);
                 videoview.start();
@@ -396,8 +395,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         videoview.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-//                Toast.makeText(LocalVideoPlayerActivity.this, "播放出错", Toast.LENGTH_SHORT).show();
-                startVitamioPlayer();
+//                Toast.makeText(VitamioVideoPlayerActivity.this, "播放出错", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -471,23 +469,6 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
     }
 
-    private void startVitamioPlayer() {
-        if(videoview != null){
-            videoview.stopPlayback();
-        }
-        Intent intent = new Intent(this, VitamioVideoPlayerActivity.class);
-        if(mediaItems != null && mediaItems.size() >0){
-            Bundle bunlder = new Bundle();
-            bunlder.putSerializable("videoList",mediaItems);
-            intent.putExtra("position",position);
-            intent.putExtras(bunlder);
-        }else if(uri != null){
-            intent.setData(uri);
-        }
-        startActivity(intent);
-        finish();
-    }
-
     private void updataVoice(int progress) {
         currentVoice = progress;
         am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
@@ -539,7 +520,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             tvName.setText(mediaItem.getName());
             setButtonStatus();
         } else {
-            Toast.makeText(LocalVideoPlayerActivity.this, "视频列表已播放完毕", Toast.LENGTH_SHORT).show();
+            Toast.makeText(VitamioVideoPlayerActivity.this, "视频列表已播放完毕", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
