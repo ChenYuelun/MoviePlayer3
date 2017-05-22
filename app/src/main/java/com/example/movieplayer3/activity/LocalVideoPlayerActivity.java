@@ -108,6 +108,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         } else if ( v == btnPre ) {
             // Handle clicks for btnPre
         } else if ( v == btnStartPause ) {
+            playOrPause();
             // Handle clicks for btnStartPause
         } else if ( v == btnNext ) {
             // Handle clicks for btnNext
@@ -115,7 +116,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             // Handle clicks for btnSwitchScreen
         }
     }
-    
+
+
+
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -125,7 +128,6 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                     seekbarVideo.setProgress(currentPosition);
                     tvCurrentTime.setText(utils.stringForTime(currentPosition));
                     sendEmptyMessageDelayed(PROCESS,1000);
-
                     break;
             }
             
@@ -149,10 +151,31 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
     private void initData() {
         utils = new Utils();
+
+        detector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public void onLongPress(MotionEvent e) {
+                playOrPause();
+                super.onLongPress(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return super.onSingleTapConfirmed(e);
+            }
+        });
     }
+
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        detector.onTouchEvent(event);
         return super.onTouchEvent(event);
     }
     
@@ -201,5 +224,16 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 finish();
             }
         });
+    }
+
+    //长按播放或暂停
+    private void playOrPause() {
+        if (videoview.isPlaying()) {
+            videoview.pause();
+            btnStartPause.setBackgroundResource(R.drawable.btn_start_selector);
+        } else {
+            videoview.start();
+            btnStartPause.setBackgroundResource(R.drawable.btn_pause_selector);
+        }
     }
 }
