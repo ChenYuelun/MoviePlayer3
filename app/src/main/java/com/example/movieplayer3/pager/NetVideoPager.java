@@ -3,28 +3,82 @@ package com.example.movieplayer3.pager;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.movieplayer3.R;
+import com.example.movieplayer3.adapter.NetVideoAdapter;
+import com.example.movieplayer3.domain.MovieInfo;
 import com.example.movieplayer3.fragment.BaseFragment;
+import com.google.gson.Gson;
+
+import org.xutils.common.Callback;
+import org.xutils.http.RequestParams;
+import org.xutils.x;
+
+import java.util.List;
 
 /**
  * Created by chenyuelun on 2017/5/19.
  */
 
 public class NetVideoPager extends BaseFragment {
-    private TextView textView;
+    private ListView lv;
+    private TextView tv_nodata;
+    private NetVideoAdapter adapter;
     @Override
     public View initView() {
-        textView = new TextView(context);
-        textView.setGravity(Gravity.CENTER);
-        textView.setTextColor(Color.RED);
-        textView.setTextSize(30);
-        return textView;
+        View view = View.inflate(context, R.layout.fragment_net_video_pager, null);
+        lv = (ListView) view.findViewById(R.id.lv);
+        tv_nodata = (TextView) view.findViewById(R.id.tv_nodata);
+        return view;
     }
 
     @Override
     public void initDatas() {
         super.initDatas();
-        textView.setText("这是网络视频界面");
+        getDataFromNet();
     }
+
+    private void getDataFromNet() {
+        RequestParams request = new RequestParams("http://api.m.mtime.cn/PageSubArea/TrailerList.api");
+        x.http().get(request, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                setData(result);
+
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+        });
+    }
+
+    private void setData(String json) {
+        MovieInfo movieInfo = new Gson().fromJson(json, MovieInfo.class);
+        List<MovieInfo.TrailersBean> trailers = movieInfo.getTrailers();
+
+        if(trailers!= null && trailers.size() > 0) {
+            adapter = new NetVideoAdapter(context,trailers);
+            lv.setAdapter(adapter);
+            tv_nodata.setVisibility(View.GONE);
+        }else {
+            tv_nodata.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+
 }
