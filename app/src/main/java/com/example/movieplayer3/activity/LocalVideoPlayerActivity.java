@@ -33,6 +33,7 @@ import static android.R.attr.process;
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int PROCESS = 1;
     private static final int HIDEMEDIACONTROLLER = 2;
+    private static final int NEWTIME = 3;
     private VideoView videoview;
     private ArrayList<MediaItem> mediaItems;
     private int position;
@@ -139,6 +140,11 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
                     hideOrShowMediaController();
                     break;
+
+                case NEWTIME:
+                    tvSystemTime.setText(getSystemTime());
+                    handler.sendEmptyMessageDelayed(NEWTIME, 60000);
+                    break;
             }
 
         }
@@ -215,6 +221,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 setButtonStatus();
                 hideOrShowMediaController();
                 handler.sendEmptyMessage(PROCESS);
+                handler.sendEmptyMessage(NEWTIME);
 
             }
         });
