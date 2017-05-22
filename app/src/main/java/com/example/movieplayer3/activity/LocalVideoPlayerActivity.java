@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -280,6 +281,31 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
         }
 
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_DOWN :
+                handler.removeMessages(HIDEMEDIACONTROLLER);
+                currentVoice--;
+                seekbarVoice.setProgress(currentVoice);
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,currentVoice,0);
+                handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER,5000);
+
+                break;
+            case KeyEvent.KEYCODE_VOLUME_UP :
+                handler.removeMessages(HIDEMEDIACONTROLLER);
+                currentVoice++;
+                seekbarVoice.setProgress(currentVoice);
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,currentVoice,0);
+                handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER,5000);
+
+                break;
+        }
+
+        return true;
     }
 
     private void getData() {
