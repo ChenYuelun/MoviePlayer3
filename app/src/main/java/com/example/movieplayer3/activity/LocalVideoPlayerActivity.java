@@ -23,7 +23,9 @@ import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static android.R.attr.process;
 
@@ -106,11 +108,13 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             finish();
             // Handle clicks for btnExit
         } else if ( v == btnPre ) {
+            playPreVideo();
             // Handle clicks for btnPre
         } else if ( v == btnStartPause ) {
             playOrPause();
             // Handle clicks for btnStartPause
         } else if ( v == btnNext ) {
+            playNextVideo();
             // Handle clicks for btnNext
         } else if ( v == btnSwitchScreen ) {
             // Handle clicks for btnSwitchScreen
@@ -161,6 +165,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+
                 return super.onDoubleTap(e);
             }
 
@@ -203,6 +208,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 tvDuration.setText(utils.stringForTime(duration));
                 seekbarVideo.setMax(duration);
                 videoview.start();
+                setButtonStatus();
                 handler.sendEmptyMessage(PROCESS);
                 
             }
@@ -220,10 +226,66 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         videoview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Toast.makeText(LocalVideoPlayerActivity.this, "播放结束", Toast.LENGTH_SHORT).show();
-                finish();
+                //Toast.makeText(LocalVideoPlayerActivity.this, "播放结束", Toast.LENGTH_SHORT).show();
+                playNextVideo();
+
             }
         });
+    }
+
+    private void playNextVideo() {
+        position++;
+        if(position<mediaItems.size()) {
+            MediaItem mediaItem = mediaItems.get(position);
+            videoview.setVideoPath(mediaItem.getData());
+            tvName.setText(mediaItem.getName());
+            setButtonStatus();
+        }else {
+            Toast.makeText(LocalVideoPlayerActivity.this, "视频列表已播放完毕", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    private void playPreVideo() {
+        position--;
+        if(position>=0) {
+            MediaItem mediaItem = mediaItems.get(position);
+            videoview.setVideoPath(mediaItem.getData());
+            tvName.setText(mediaItem.getName());
+            setButtonStatus();
+        }
+    }
+
+    private void setButtonStatus() {
+        if(mediaItems!= null && mediaItems.size() > 0) {
+            setEnable(true);
+            if(position ==0) {
+                btnPre.setBackgroundResource(R.drawable.btn_pre_gray);
+                btnPre.setEnabled(false);
+            }
+
+            if(position == mediaItems.size()-1) {
+                btnNext.setBackgroundResource(R.drawable.btn_next_gray);
+                btnNext.setEnabled(false);
+            }
+        }
+    }
+
+    private void setEnable(boolean b) {
+        if(b) {
+            btnPre.setBackgroundResource(R.drawable.btn_pre_selector);
+            btnNext.setBackgroundResource(R.drawable.btn_next_selector);
+        }else {
+            btnPre.setBackgroundResource(R.drawable.btn_pre_gray);
+            btnNext.setBackgroundResource(R.drawable.btn_next_gray);
+        }
+        btnPre.setEnabled(b);
+        btnNext.setEnabled(b);
+    }
+
+    private String getSystemTime() {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+        return format.format(new Date());
     }
 
     //长按播放或暂停
