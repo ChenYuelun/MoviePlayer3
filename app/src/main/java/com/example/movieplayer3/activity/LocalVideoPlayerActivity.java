@@ -4,11 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.process;
 
 
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
@@ -76,6 +75,11 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private int videoHeight;
     private final  int DEFUALT_SCREEN =3;
     private final  int FULL_SCREEN = 4;
+
+    private AudioManager am;
+    private int maxVoice;
+    private int currentVoice;
+    private boolean isMute = false;
 
     /**
      * Find the Views in the layout<br />
@@ -122,6 +126,15 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     public void onClick(View v) {
         if (v == btnVoice) {
             // Handle clicks for btnVoice
+            if(!isMute) {
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,0,0);
+                seekbarVoice.setProgress(0);
+                isMute = true;
+            }else {
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,currentVoice,0);
+                seekbarVoice.setProgress(currentVoice);
+                isMute = false;
+            }
         } else if (v == btnSwitchPlayer) {
             // Handle clicks for btnSwitchPlayer
         } else if (v == btnExit) {
@@ -213,6 +226,11 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         screenHeight = metrics.heightPixels;
         screenWidth = metrics.widthPixels;
+        //初始化声音相关
+        am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        currentVoice= am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        seekbarVoice.setMax(maxVoice);
     }
 
 
@@ -298,7 +316,41 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
             }
         });
+
+        seekbarVoice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    updataVoice(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
+
     }
+
+    private void updataVoice(int progress) {
+        currentVoice = progress;
+        am.setStreamVolume(AudioManager.STREAM_MUSIC,currentVoice,0);
+        seekbarVoice.setProgress(currentVoice);
+        if(currentVoice == 0) {
+            isMute = true;
+        }else {
+            isMute = false;
+        }
+    }
+
     public class MyBroadCastReceiver extends BroadcastReceiver {
 
         @Override
