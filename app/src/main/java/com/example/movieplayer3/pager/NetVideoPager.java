@@ -1,12 +1,16 @@
 package com.example.movieplayer3.pager;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.movieplayer3.R;
+import com.example.movieplayer3.activity.LocalVideoPlayerActivity;
 import com.example.movieplayer3.adapter.NetVideoAdapter;
 import com.example.movieplayer3.domain.MovieInfo;
 import com.example.movieplayer3.fragment.BaseFragment;
@@ -31,6 +35,16 @@ public class NetVideoPager extends BaseFragment {
         View view = View.inflate(context, R.layout.fragment_net_video_pager, null);
         lv = (ListView) view.findViewById(R.id.lv);
         tv_nodata = (TextView) view.findViewById(R.id.tv_nodata);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MovieInfo.TrailersBean item = adapter.getItem(position);
+                Intent intent = new Intent(context, LocalVideoPlayerActivity.class);
+                intent.setDataAndType(Uri.parse(item.getUrl()),"video/*");
+                startActivity(intent);
+            }
+        });
         return view;
     }
 
