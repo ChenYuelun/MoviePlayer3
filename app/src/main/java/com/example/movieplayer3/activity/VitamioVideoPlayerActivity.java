@@ -1,7 +1,9 @@
 package com.example.movieplayer3.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -396,6 +398,16 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
 //                Toast.makeText(VitamioVideoPlayerActivity.this, "播放出错", Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(VitamioVideoPlayerActivity.this)
+                            .setTitle("提示")
+                            .setMessage("无法播放，请检查您的网络或文件是否已损坏")
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .show();
                 return true;
             }
         });
