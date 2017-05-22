@@ -383,4 +383,17 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+            handler = null;
+        }
+        super.onDestroy();
+    }
 }
