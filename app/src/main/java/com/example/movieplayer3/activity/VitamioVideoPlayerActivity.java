@@ -156,6 +156,8 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                 isMute = false;
             }
         } else if (v == btnSwitchPlayer) {
+
+            switchPlayer();
             // Handle clicks for btnSwitchPlayer
         } else if (v == btnExit) {
             finish();
@@ -173,6 +175,38 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             SetScreenType();
             // Handle clicks for btnSwitchScreen
         }
+    }
+
+
+    private void switchPlayer() {
+        new AlertDialog.Builder(this)
+                .setTitle("切换播放器")
+                .setMessage("当前使用系统播放器播放，若播放有问题请选择万能播放器播放")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startSystemPlayer();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private void startSystemPlayer() {
+        if(videoview != null){
+            videoview.stopPlayback();
+        }
+        Intent intent = new Intent(this, LocalVideoPlayerActivity.class);
+        if(mediaItems != null && mediaItems.size() >0){
+            Bundle bunlder = new Bundle();
+            bunlder.putSerializable("videoList",mediaItems);
+            intent.putExtra("position",position);
+            intent.putExtras(bunlder);
+        }else if(uri != null){
+            intent.setData(uri);
+        }
+        startActivity(intent);
+        finish();
     }
 
     private int preCurrentPosition;
