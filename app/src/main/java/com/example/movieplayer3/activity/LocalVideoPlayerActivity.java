@@ -166,7 +166,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         }
     }
 
-
+    private int preCurrentPosition;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -184,6 +184,19 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                     }else{
                         seekbarVideo.setSecondaryProgress(0);
                     }
+                    
+                    if(isNetUri && videoview.isPlaying()) {
+                        int duration = currentPosition - preCurrentPosition;
+                        if(duration < 500) {
+                            ll_buffering.setVisibility(View.VISIBLE);
+                        }else {
+                            ll_buffering.setVisibility(View.GONE);
+                        }
+                        preCurrentPosition = currentPosition;
+                    }
+
+
+
                     break;
 
                 case HIDEMEDIACONTROLLER:
@@ -418,23 +431,23 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         });
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            videoview.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                @Override
-                public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                    switch (what) {
-                        case MediaPlayer.MEDIA_INFO_BUFFERING_START :
-                            ll_buffering.setVisibility(View.VISIBLE);
-                            break;
-                        case MediaPlayer.MEDIA_INFO_BUFFERING_END :
-                            ll_buffering.setVisibility(View.GONE);
-                            break;
-                    }
-
-                    return false;
-                }
-            });
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//            videoview.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+//                @Override
+//                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+//                    switch (what) {
+//                        case MediaPlayer.MEDIA_INFO_BUFFERING_START :
+//                            ll_buffering.setVisibility(View.VISIBLE);
+//                            break;
+//                        case MediaPlayer.MEDIA_INFO_BUFFERING_END :
+//                            ll_buffering.setVisibility(View.GONE);
+//                            break;
+//                    }
+//
+//                    return false;
+//                }
+//            });
+//        }
 
 
     }
