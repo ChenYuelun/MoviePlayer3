@@ -20,6 +20,7 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +39,7 @@ import java.util.Date;
 
 import static android.R.attr.breadCrumbShortTitle;
 import static android.R.attr.key;
+import static android.view.View.X;
 
 
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
@@ -304,11 +306,15 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private int touchRang;
     private int mVocie;
 
+    private float startX;
+    private float newX;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         detector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                startX = event.getX();
                 startY = event.getY();
                 touchRang = Math.min(screenHeight, screenWidth);
                 mVocie = am.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -316,12 +322,28 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 break;
             case MotionEvent.ACTION_MOVE:
                 newY = event.getY();
+                newX = event.getX();
                 float distanceY = startY - newY;
-                int changVoice = (int) ((distanceY / touchRang) * maxVoice);
-                if (changVoice != 0) {
-                    int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
-                    updataVoice(voice);
+                if(startX < screenWidth/2) {
+                    //左半区，调亮度
+                    final double FLING_MIN_DISTANCE = 0.5;
+                    final double FLING_MIN_VELOCITY = 0.5;
+                    if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(10);
+                    }
+                    if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(-10);
+                    }
+
+                }else {
+                    //右半区，调声音
+                    int changVoice = (int) ((distanceY / touchRang) * maxVoice);
+                    if (changVoice != 0) {
+                        int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
+                        updataVoice(voice);
+                    }
                 }
+
 
                 break;
             case MotionEvent.ACTION_UP:
@@ -331,6 +353,18 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
 
         return super.onTouchEvent(event);
+    }
+
+    private void setBrightness(float brightness) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1) {
+            lp.screenBrightness = 1;
+        } else if (lp.screenBrightness < 0.1) {
+            lp.screenBrightness = (float) 0.1;
+        }
+        getWindow().setAttributes(lp);
+
     }
 
 
@@ -367,12 +401,10 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
 
                 break;
-            case KeyEvent.KEYCODE_BACK:
-                finish();
-                break;
+
         }
 
-        return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     private void getData() {
@@ -400,7 +432,6 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 handler.sendEmptyMessage(PROCESS);
                 handler.sendEmptyMessage(NEWTIME);
                 if(videoview.isPlaying()){
-                    //设置暂停
                     btnStartPause.setBackgroundResource(R.drawable.btn_pause_selector);
                 }else {
                     btnStartPause.setBackgroundResource(R.drawable.btn_start_selector);

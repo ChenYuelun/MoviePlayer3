@@ -63,7 +63,6 @@ public class LocalVideoAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        //根据位置得到对应的数据
         MediaItem mediaItem = datas.get(position);
         viewHolder.tv_name.setText(mediaItem.getName());
         viewHolder.tv_size.setText(Formatter.formatFileSize(context,mediaItem.getSize()));
