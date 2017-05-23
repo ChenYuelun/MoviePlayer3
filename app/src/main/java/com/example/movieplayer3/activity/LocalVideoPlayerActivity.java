@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static android.R.attr.breadCrumbShortTitle;
+import static android.R.attr.cacheColorHint;
 import static android.R.attr.key;
 import static android.view.View.X;
 
@@ -47,6 +48,8 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private static final int HIDEMEDIACONTROLLER = 2;
     private static final int NEWTIME = 3;
     private static final int SHOW_NET_SPEED = 4;
+    private static final int HIDE_BRIGHT = 5;
+    private static final int HIDE_VOICE = 6;
     private VideoView videoview;
     private ArrayList<MediaItem> mediaItems;
     private int position;
@@ -98,6 +101,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private LinearLayout ll_loading;
     private TextView tv_loading_net_speed;
 
+    private TextView tv_bright;
+    private TextView tv_voice;
+
     /**
      * Find the Views in the layout<br />
      * <br />
@@ -127,6 +133,8 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         tv_net_speed = (TextView)findViewById(R.id.tv_net_speed);
         ll_loading = (LinearLayout)findViewById(R.id.ll_loading);
         tv_loading_net_speed = (TextView)findViewById(R.id.tv_loading_net_speed);
+        tv_bright = (TextView)findViewById(R.id.tv_bright);
+        tv_voice = (TextView)findViewById(R.id.tv_voice);
 
         btnVoice.setOnClickListener(this);
         btnSwitchPlayer.setOnClickListener(this);
@@ -242,6 +250,13 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                     tv_loading_net_speed.setText(speed+"kb/s");
                     sendEmptyMessageDelayed(SHOW_NET_SPEED,1000);
                     break;
+
+                case HIDE_BRIGHT:
+                    tv_bright.setVisibility(View.GONE);
+                    break;
+                case HIDE_VOICE:
+                    tv_bright.setVisibility(View.GONE);
+                    break;
             }
 
         }
@@ -308,6 +323,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
     private float startX;
     private float newX;
+    private int mPosition;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -316,6 +332,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             case MotionEvent.ACTION_DOWN:
                 startX = event.getX();
                 startY = event.getY();
+                mPosition = videoview.getCurrentPosition();
                 touchRang = Math.min(screenHeight, screenWidth);
                 mVocie = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 handler.removeMessages(HIDEMEDIACONTROLLER);
@@ -324,23 +341,36 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 newY = event.getY();
                 newX = event.getX();
                 float distanceY = startY - newY;
-                if(startX < screenWidth/2) {
-                    //左半区，调亮度
-                    final double FLING_MIN_DISTANCE = 0.5;
-                    final double FLING_MIN_VELOCITY = 0.5;
-                    if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
-                        setBrightness(10);
-                    }
-                    if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
-                        setBrightness(-10);
-                    }
+                float distanceX = newX - startX;
 
-                }else {
-                    //右半区，调声音
-                    int changVoice = (int) ((distanceY / touchRang) * maxVoice);
-                    if (changVoice != 0) {
-                        int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
-                        updataVoice(voice);
+                if(Math.abs(distanceY) > Math.abs(distanceX) && Math.abs(distanceY) > 8) {
+                    if(startX < screenWidth/2) {
+                        //左半区，调亮度
+
+                        final double FLING_MIN_DISTANCE = 0.5;
+                        final double FLING_MIN_VELOCITY = 0.5;
+                        if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                            setBrightness(10);
+                        }
+                        if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                            setBrightness(-10);
+                        }
+
+                    }else {
+                        //右半区，调声音
+                        tv_voice.setVisibility(View.VISIBLE);
+                        int changVoice = (int) ((distanceY / touchRang) * maxVoice);
+                        if (changVoice != 0) {
+                            int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
+                            updataVoice(voice);
+                        }
+                    }
+                }else if (Math.abs(distanceY) < Math.abs(distanceX) && Math.abs(distanceX) > 8){
+                    float video = (distanceX/screenWidth)*duration;
+                    float changVideo = Math.min(Math.max(video+mPosition,0),duration);
+                    if(changVideo != 0) {
+                        videoview.seekTo((int) changVideo);
+                        seekbarVideo.setProgress((int) changVideo);
                     }
                 }
 
@@ -348,6 +378,8 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 break;
             case MotionEvent.ACTION_UP:
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
+                handler.sendEmptyMessageDelayed(HIDE_BRIGHT,2000);
+                handler.sendEmptyMessageDelayed(HIDE_VOICE,2000);
                 break;
         }
 
@@ -356,6 +388,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     }
 
     private void setBrightness(float brightness) {
+        tv_bright.setVisibility(View.VISIBLE);
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
         if (lp.screenBrightness > 1) {
@@ -364,6 +397,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
             lp.screenBrightness = (float) 0.1;
         }
         getWindow().setAttributes(lp);
+
+        float sb = lp.screenBrightness;
+        tv_bright.setText("亮度："+(int) Math.ceil(sb * 100) + "%");
 
     }
 
@@ -391,8 +427,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 seekbarVoice.setProgress(currentVoice);
                 am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
-
-                break;
+                return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
                 handler.removeMessages(HIDEMEDIACONTROLLER);
                 currentVoice++;
@@ -400,7 +435,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                 am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
 
-                break;
+                return true;
 
         }
 
@@ -539,6 +574,9 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private void updataVoice(int progress) {
         currentVoice = progress;
         am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
+        int v = currentVoice * 100 / maxVoice;
+        tv_voice.setText("音量:" + v +"%" );
+
         seekbarVoice.setProgress(currentVoice);
         if (currentVoice == 0) {
             isMute = true;
