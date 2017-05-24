@@ -3,14 +3,12 @@ package com.example.movieplayer3.pager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -65,7 +63,7 @@ public class LocalVideoPager extends BaseFragment {
             super.handleMessage(msg);
             if(list!= null && list.size() >0) {
                 tv_nodata.setVisibility(View.GONE);
-                lv.setAdapter(new LocalVideoAdapter(context,list));
+                lv.setAdapter(new LocalVideoAdapter(context,list, true));
             }else {
                 tv_nodata.setVisibility(View.VISIBLE);
             }

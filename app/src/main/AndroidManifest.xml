@@ -2,13 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.movieplayer3">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
 
     <application
         android:name=".app.MyApplication"
@@ -42,6 +41,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="video/*" />
@@ -60,7 +60,6 @@
                 <data android:mimeType="video/3gpp" />
                 <data android:mimeType="video/3gpp2" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -276,15 +275,13 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
-
         </activity>
-
-        <activity android:name=".activity.VitamioVideoPlayerActivity"
-            android:screenOrientation="landscape"
+        <activity
+            android:name=".activity.VitamioVideoPlayerActivity"
             android:launchMode="singleTask"
-            android:theme="@style/noAnimation_Theme"
-            ></activity>
+            android:screenOrientation="landscape"
+            android:theme="@style/noAnimation_Theme" />
+        <activity android:name=".activity.LocalMusicPlayerActivity"></activity>
     </application>
 
 </manifest>
