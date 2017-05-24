@@ -13,6 +13,7 @@ import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.domain.MovieInfo;
 import com.example.movieplayer3.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 import org.xutils.common.Callback;
 import org.xutils.image.ImageOptions;
@@ -32,7 +33,7 @@ public class NetVideoAdapter extends BaseAdapter {
     private final Context context;
     private final List<MovieInfo.TrailersBean> datas;
     private Utils utils;
-    private ImageOptions options;
+    //private ImageOptions options;
 
 
 
@@ -41,11 +42,11 @@ public class NetVideoAdapter extends BaseAdapter {
         this.datas = trailers;
         utils = new Utils();
 
-        options = new ImageOptions.Builder()
-                .setImageScaleType(ImageView.ScaleType.CENTER_CROP)
-                .setFailureDrawableId(R.drawable.video_default)
-                .setLoadingDrawableId(R.drawable.video_default)
-                .build();
+//        options = new ImageOptions.Builder()
+//                .setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+//                .setFailureDrawableId(R.drawable.video_default)
+//                .setLoadingDrawableId(R.drawable.video_default)
+//                .build();
     }
 
 
@@ -83,7 +84,12 @@ public class NetVideoAdapter extends BaseAdapter {
         viewHolder.tv_name.setText(bean.getMovieName());
         viewHolder.tv_content.setText(bean.getVideoTitle());
         viewHolder.tv_size.setText(utils.stringForTime(bean.getVideoLength()*1000));
-        x.image().bind(viewHolder.icon,bean.getCoverImg(),options);
+        //x.image().bind(viewHolder.icon,bean.getCoverImg(),options);
+        Picasso.with(context)
+                .load(bean.getCoverImg())
+                .placeholder(R.drawable.video_default)
+                .error(R.drawable.video_default)
+                .into(viewHolder.icon);
 
 
         return convertView;
