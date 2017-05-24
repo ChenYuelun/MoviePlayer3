@@ -18,6 +18,7 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +44,8 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private static final int HIDEMEDIACONTROLLER = 2;
     private static final int NEWTIME = 3;
     private static final int SHOW_NET_SPEED = 4;
+    private static final int HIDE_BRIGHT = 5;
+    private static final int HIDE_VOICE = 6;
     private VitamioVideoView videoview;
     private ArrayList<MediaItem> mediaItems;
     private int position;
@@ -67,6 +70,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private GestureDetector detector;
     private Utils utils;
     private int duration;
+    private int currentPosition;
     private boolean isShowMediaController = true;
     private MyBroadCastReceiver receiver;
     private Uri uri;
@@ -93,6 +97,9 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
 
     private LinearLayout ll_loading;
     private TextView tv_loading_net_speed;
+
+    private TextView tv_bright;
+    private TextView tv_voice;
 
     /**
      * Find the Views in the layout<br />
@@ -124,6 +131,9 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         tv_net_speed = (TextView)findViewById(R.id.tv_net_speed);
         ll_loading = (LinearLayout)findViewById(R.id.ll_loading);
         tv_loading_net_speed = (TextView)findViewById(R.id.tv_loading_net_speed);
+
+        tv_bright = (TextView)findViewById(R.id.tv_bright);
+        tv_voice = (TextView)findViewById(R.id.tv_voice);
 
         btnVoice.setOnClickListener(this);
         btnSwitchPlayer.setOnClickListener(this);
@@ -215,7 +225,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case PROCESS:
-                    int currentPosition = (int) videoview.getCurrentPosition();
+                    currentPosition = (int) videoview.getCurrentPosition();
                     seekbarVideo.setProgress(currentPosition);
                     tvCurrentTime.setText(utils.stringForTime(currentPosition));
                     sendEmptyMessageDelayed(PROCESS, 1000);
@@ -257,6 +267,13 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                     tv_net_speed.setText(speed+"kb/s");
                     tv_loading_net_speed.setText(speed+"kb/s");
                     sendEmptyMessageDelayed(SHOW_NET_SPEED,1000);
+                    break;
+
+                case HIDE_BRIGHT:
+                    tv_bright.setVisibility(View.GONE);
+                    break;
+                case HIDE_VOICE:
+                    tv_voice.setVisibility(View.GONE);
                     break;
             }
 
@@ -322,33 +339,86 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private int touchRang;
     private int mVocie;
 
+    private float startX;
+    private float newX;
+    private int mPosition;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         detector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                startX = event.getX();
                 startY = event.getY();
+                mPosition = (int) videoview.getCurrentPosition();
                 touchRang = Math.min(screenHeight, screenWidth);
                 mVocie = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 handler.removeMessages(HIDEMEDIACONTROLLER);
                 break;
             case MotionEvent.ACTION_MOVE:
                 newY = event.getY();
+                newX = event.getX();
                 float distanceY = startY - newY;
-                int changVoice = (int) ((distanceY / touchRang) * maxVoice);
-                if (changVoice != 0) {
-                    int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
-                    updataVoice(voice);
+                float distanceX = newX - startX;
+
+                if(Math.abs(distanceY) > Math.abs(distanceX) && Math.abs(distanceY) > 8) {
+                    if(startX < screenWidth/2) {
+                        //左半区，调亮度
+
+                        final double FLING_MIN_DISTANCE = 0.5;
+                        final double FLING_MIN_VELOCITY = 0.5;
+                        if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                            setBrightness(10);
+                        }
+                        if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                            setBrightness(-10);
+                        }
+
+                    }else {
+                        //右半区，调声音
+
+                        int changVoice = (int) ((distanceY / touchRang) * maxVoice);
+                        if (changVoice != 0) {
+                            int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
+                            updataVoice(voice);
+                        }
+                    }
+                }else if (Math.abs(distanceY) < Math.abs(distanceX) && Math.abs(distanceX) > 8){
+                    float video = (distanceX/screenWidth)*duration;
+                    float changVideo = Math.min(Math.max(video+mPosition,0),duration);
+                    if(changVideo != 0) {
+                        videoview.seekTo((int) changVideo);
+                        seekbarVideo.setProgress((int) changVideo);
+                    }
                 }
+
 
                 break;
             case MotionEvent.ACTION_UP:
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
+                handler.sendEmptyMessageDelayed(HIDE_BRIGHT,2000);
+                handler.sendEmptyMessageDelayed(HIDE_VOICE,2000);
                 break;
         }
 
 
         return super.onTouchEvent(event);
+    }
+
+    private void setBrightness(float brightness) {
+        handler.sendEmptyMessage(HIDE_VOICE);
+        tv_bright.setVisibility(View.VISIBLE);
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1) {
+            lp.screenBrightness = 1;
+        } else if (lp.screenBrightness < 0.1) {
+            lp.screenBrightness = (float) 0.1;
+        }
+        getWindow().setAttributes(lp);
+
+        float sb = lp.screenBrightness;
+        tv_bright.setText("亮度："+(int) Math.ceil(sb * 100) + "%");
+
     }
 
 
@@ -376,7 +446,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                 am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
 
-                break;
+                return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
                 handler.removeMessages(HIDEMEDIACONTROLLER);
                 currentVoice++;
@@ -384,13 +454,11 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                 am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
                 handler.sendEmptyMessageDelayed(HIDEMEDIACONTROLLER, 5000);
 
-                break;
-            case KeyEvent.KEYCODE_BACK:
-                finish();
-                break;
+                return true;
+
         }
 
-        return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     private void getData() {
@@ -516,8 +584,12 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     }
 
     private void updataVoice(int progress) {
+        handler.sendEmptyMessage(HIDE_BRIGHT);
+        tv_voice.setVisibility(View.VISIBLE);
         currentVoice = progress;
         am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
+        int v = currentVoice * 100 / maxVoice;
+        tv_voice.setText("音量:" + v +"%" );
         seekbarVoice.setProgress(currentVoice);
         if (currentVoice == 0) {
             isMute = true;

@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -37,10 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.breadCrumbShortTitle;
-import static android.R.attr.cacheColorHint;
-import static android.R.attr.key;
-import static android.view.View.X;
+
 
 
 public class LocalVideoPlayerActivity extends AppCompatActivity implements View.OnClickListener {
@@ -74,6 +70,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     private GestureDetector detector;
     private Utils utils;
     private int duration;
+    private int currentPosition;
     private boolean isShowMediaController = true;
     private MyBroadCastReceiver receiver;
     private Uri uri;
@@ -207,7 +204,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case PROCESS:
-                    int currentPosition = videoview.getCurrentPosition();
+                    currentPosition = videoview.getCurrentPosition();
                     seekbarVideo.setProgress(currentPosition);
                     tvCurrentTime.setText(utils.stringForTime(currentPosition));
                     sendEmptyMessageDelayed(PROCESS, 1000);
@@ -255,7 +252,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
                     tv_bright.setVisibility(View.GONE);
                     break;
                 case HIDE_VOICE:
-                    tv_bright.setVisibility(View.GONE);
+                    tv_voice.setVisibility(View.GONE);
                     break;
             }
 
@@ -358,7 +355,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
 
                     }else {
                         //右半区，调声音
-                        tv_voice.setVisibility(View.VISIBLE);
+
                         int changVoice = (int) ((distanceY / touchRang) * maxVoice);
                         if (changVoice != 0) {
                             int voice = Math.min((Math.max(mVocie + changVoice, 0)), maxVoice);
@@ -388,6 +385,7 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     }
 
     private void setBrightness(float brightness) {
+        handler.sendEmptyMessage(HIDE_VOICE);
         tv_bright.setVisibility(View.VISIBLE);
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
@@ -572,6 +570,8 @@ public class LocalVideoPlayerActivity extends AppCompatActivity implements View.
     }
 
     private void updataVoice(int progress) {
+        handler.sendEmptyMessage(HIDE_BRIGHT);
+        tv_voice.setVisibility(View.VISIBLE);
         currentVoice = progress;
         am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVoice, 0);
         int v = currentVoice * 100 / maxVoice;
