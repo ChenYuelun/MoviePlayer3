@@ -227,7 +227,7 @@ public class MusicPlayService extends Service {
 
     //设置进度
     private void seekTo(int position) {
-
+        mediaPlayer.seekTo(position);
     }
 
     //获取歌曲名
