@@ -1,5 +1,8 @@
 package com.example.movieplayer3.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -13,6 +16,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.movieplayer3.IMusicPlayService;
+import com.example.movieplayer3.R;
+import com.example.movieplayer3.activity.LocalMusicPlayerActivity;
 import com.example.movieplayer3.domain.MediaItem;
 
 import java.io.IOException;
@@ -98,6 +103,7 @@ public class MusicPlayService extends Service {
     private int positin;
     private MediaPlayer mediaPlayer;
     private MediaItem mediaItem;
+    private NotificationManager notificationManager;
 
     @Nullable
     @Override
@@ -179,6 +185,18 @@ public class MusicPlayService extends Service {
         public void onPrepared(MediaPlayer mp) {
             sendChange(ONPREPARED);
             start();
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Intent intent = new Intent(MusicPlayService.this, LocalMusicPlayerActivity.class);
+            intent.putExtra("fromNotification",true);
+            PendingIntent pi= PendingIntent.getActivity(MusicPlayService.this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            Notification notification = new Notification.Builder(MusicPlayService.this)
+                    .setSmallIcon(R.drawable.notification_music_playing)
+                    .setContentTitle("MyMusic")
+                    .setContentText("正在播放"+ mediaItem.getName())
+                    .setContentIntent(pi)
+                    .build();
+            notificationManager.notify(0,notification);
+
         }
     }
 

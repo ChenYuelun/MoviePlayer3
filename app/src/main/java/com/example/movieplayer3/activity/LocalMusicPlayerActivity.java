@@ -55,7 +55,11 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             if(service != null) {
                 try {
                     Log.e("TAG","position" + position);
-                    service.playMusic(position);
+                    if(fromNotification) {
+                        setViewData();
+                    }else {
+                        service.playMusic(position);
+                    }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -70,6 +74,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     private int position;
     private int duration;
     private int currentPosition;
+    private boolean fromNotification;
 
     /**
      * Find the Views in the layout<br />
@@ -204,7 +209,10 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     }
 
     private void getData() {
-        position = getIntent().getIntExtra("position",0);
+        fromNotification = getIntent().getBooleanExtra("fromNotification", false);
+        if(!fromNotification) {
+            position = getIntent().getIntExtra("position",0);
+        }
     }
 
     private void startAndBindService() {
