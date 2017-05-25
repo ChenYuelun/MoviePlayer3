@@ -120,6 +120,12 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             setPlayMode();
 
         } else if ( v == btnPre ) {
+            try {
+                MusicPlayService.nextFromUser = true;
+                service.playPre();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             // Handle clicks for btnPre
         } else if ( v == btnStartPause ) {
             try {
@@ -135,6 +141,12 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             }
             // Handle clicks for btnStartPause
         } else if ( v == btnNext ) {
+            try {
+                MusicPlayService.nextFromUser = true;
+                service.playNext();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             // Handle clicks for btnNext
         } else if ( v == btnLyric ) {
             // Handle clicks for btnLyric

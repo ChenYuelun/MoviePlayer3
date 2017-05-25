@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.movieplayer3.IMusicPlayService;
 import com.example.movieplayer3.R;
@@ -113,7 +114,7 @@ public class MusicPlayService extends Service {
 
 
 
-    private int positin;
+    private int position;
     private MediaPlayer mediaPlayer;
     private MediaItem mediaItem;
     private NotificationManager notificationManager;
@@ -124,6 +125,7 @@ public class MusicPlayService extends Service {
     public static int REPEAT_RANDOM = 4;
 
     private int playMode = REPEAT_NORMAL;
+    public static boolean nextFromUser = false;
 
     @Nullable
     @Override
@@ -174,7 +176,7 @@ public class MusicPlayService extends Service {
     //根据位置从集合取数据，开始播放
     private void playMusic(int position) {
         Log.e("TAG","service_playMusic");
-        this.positin = position;
+        this.position = position;
         if(list != null && list.size()>0) {
             if(position < list.size()) {
                 mediaItem = list.get(position);
@@ -287,12 +289,43 @@ public class MusicPlayService extends Service {
 
     //播放下一个
     private void playNext() {
+        if(playMode != REPEAT_SINGLE || nextFromUser) {
+            position++;
+            nextFromUser = false;
+            if(position > list.size()-1) {
+                if(playMode == REPEAT_NORMAL || playMode == REPEAT_SINGLE) {
+                    position = list.size()-1;
+                    Toast.makeText(MusicPlayService.this, "已到最后一首", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(playMode == REPEAT_ALL) {
+                    position = 0;
+                }
+            }
+        }
+        playMusic(position);
 
     }
 
 
     //播放上一个
     private void playPre() {
+        if(playMode != REPEAT_SINGLE || nextFromUser) {
+            position--;
+            nextFromUser = false;
+            if(position < 0) {
+                if(playMode == REPEAT_NORMAL || playMode == REPEAT_SINGLE ) {
+                    position = 0;
+                    Toast.makeText(MusicPlayService.this, "已是第一首", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(playMode == REPEAT_ALL) {
+                    position = list.size() - 1;
+                }
+            }
+
+        }
+        playMusic(position);
 
     }
 
