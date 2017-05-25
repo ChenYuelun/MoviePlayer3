@@ -4,7 +4,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -13,6 +15,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -126,6 +130,8 @@ public class MusicPlayService extends Service {
 
     private int playMode = REPEAT_NORMAL;
     public static boolean nextFromUser = false;
+    private TelephonyManager telephonyManager;
+
 
     @Nullable
     @Override
@@ -219,8 +225,45 @@ public class MusicPlayService extends Service {
                     .build();
             notificationManager.notify(0,notification);
 
+            setListener();
+
         }
     }
+
+    private void setListener() {
+        telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+        PhoneStateListener listener = new PhoneStateListener() {
+            /**
+             * @param state          电话状态
+             * @param incomingNumber 播打进来的电话号码
+             * @see TelephonyManager#CALL_STATE_IDLE 空闲状态
+             * @see TelephonyManager#CALL_STATE_RINGING 响铃状态
+             * @see TelephonyManager#CALL_STATE_OFFHOOK 通话状态
+             */
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                super.onCallStateChanged(state, incomingNumber);
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        Log.e("TAG", "空闲状态");
+                        mediaPlayer.start();
+                        break;
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        Log.e("TAG", "响铃状态");
+                        mediaPlayer.pause();
+                        break;
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        Log.e("TAG", "通话状态");
+                        mediaPlayer.pause();
+                        break;
+                }
+            }
+        };
+        //监听打电话状态
+        telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
 
     private void sendChange(String action) {
         Intent intent = new Intent(action);
@@ -336,6 +379,9 @@ public class MusicPlayService extends Service {
     private void setPlayMode(int playMode) {
         this.playMode = playMode;
     }
+
+
+
 
 
 

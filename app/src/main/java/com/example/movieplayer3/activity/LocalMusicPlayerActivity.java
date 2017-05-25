@@ -301,4 +301,24 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
 
         handler.sendEmptyMessage(UPDATA_PROGRESS);
     }
+
+    @Override
+    protected void onDestroy() {
+        if(handler != null) {
+            handler.removeCallbacksAndMessages(null);
+            handler = null;
+        }
+        if(conn != null) {
+            unbindService(conn);
+            conn = null;
+        }
+        if(receiver!= null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        
+        super.onDestroy();
+        
+        
+    }
 }
