@@ -25,6 +25,7 @@ import java.util.ArrayList;
 public class MusicPlayService extends Service {
 
 
+    public static final String ONPREPARED = "myMusicisonprepared";
     private IMusicPlayService.Stub stub = new IMusicPlayService.Stub() {
         MusicPlayService service = MusicPlayService.this;
 
@@ -176,8 +177,15 @@ public class MusicPlayService extends Service {
     private class MyOnPreparedListener implements MediaPlayer.OnPreparedListener {
         @Override
         public void onPrepared(MediaPlayer mp) {
+            sendChange(ONPREPARED);
             start();
         }
+    }
+
+    private void sendChange(String action) {
+        Intent intent = new Intent(action);
+        sendBroadcast(intent);
+
     }
 
     private class MyOnErrorListener implements MediaPlayer.OnErrorListener {
@@ -209,12 +217,12 @@ public class MusicPlayService extends Service {
 
     //获取总时长
     private int duration() {
-        return 0;
+        return mediaPlayer.getDuration();
     }
 
     //获取进度
     private int currentPosition() {
-        return 0;
+        return mediaPlayer.getCurrentPosition();
     }
 
     //设置进度
@@ -224,13 +232,13 @@ public class MusicPlayService extends Service {
 
     //获取歌曲名
     private String getMusicName() {
-        return "";
+        return mediaItem.getName();
     }
 
 
     //获取歌手名
     private String getArtistName() {
-        return "";
+        return mediaItem.getArtist();
     }
 
 
