@@ -117,6 +117,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     public void onClick(View v) {
         if ( v == btnPlaymode ) {
             // Handle clicks for btnPlaymode
+            setPlayMode();
 
         } else if ( v == btnPre ) {
             // Handle clicks for btnPre
@@ -137,6 +138,45 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             // Handle clicks for btnNext
         } else if ( v == btnLyric ) {
             // Handle clicks for btnLyric
+        }
+    }
+
+    private void setPlayMode() {
+        try {
+            int playMode = service.getPlayMode();
+            if(playMode == MusicPlayService.REPEAT_NORMAL) {
+                playMode = MusicPlayService.REPEAT_ALL;
+            }else if(playMode == MusicPlayService.REPEAT_ALL) {
+                playMode = MusicPlayService.REPEAT_SINGLE;
+            }else if(playMode == MusicPlayService.REPEAT_SINGLE) {
+                playMode = MusicPlayService.REPEAT_NORMAL;
+            }
+
+
+
+
+            service.setPlayMode(playMode);
+            setBtnPlayModeImage();
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setBtnPlayModeImage() {
+
+        try {
+            int playMode = service.getPlayMode();
+            if(playMode == MusicPlayService.REPEAT_NORMAL) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_normal_selector);
+            }else if(playMode == MusicPlayService.REPEAT_ALL) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_all_selector);
+            }else if(playMode == MusicPlayService.REPEAT_SINGLE) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_single_selector);
+            }
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -242,6 +282,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             tvAudioname.setText(service.getMusicName());
             duration = service.duration();
             seekbarAudio.setMax(duration);
+            setBtnPlayModeImage();
         } catch (RemoteException e) {
             e.printStackTrace();
         }

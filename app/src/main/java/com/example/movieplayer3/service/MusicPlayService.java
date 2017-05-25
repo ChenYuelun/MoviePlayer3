@@ -99,11 +99,31 @@ public class MusicPlayService extends Service {
         public boolean isPlaying() throws RemoteException {
             return mediaPlayer.isPlaying();
         }
+
+        @Override
+        public void setPlayMode(int playMode) throws RemoteException {
+            service.setPlayMode(playMode);
+        }
+
+        @Override
+        public int getPlayMode() throws RemoteException {
+            return service.getPlayMode();
+        }
     };
+
+
+
     private int positin;
     private MediaPlayer mediaPlayer;
     private MediaItem mediaItem;
     private NotificationManager notificationManager;
+
+    public static int REPEAT_NORMAL = 1;
+    public static int REPEAT_SINGLE = 2;
+    public static int REPEAT_ALL = 3;
+    public static int REPEAT_RANDOM = 4;
+
+    private int playMode = REPEAT_NORMAL;
 
     @Nullable
     @Override
@@ -274,6 +294,14 @@ public class MusicPlayService extends Service {
     //播放上一个
     private void playPre() {
 
+    }
+
+    private int getPlayMode() {
+        return playMode;
+    }
+
+    private void setPlayMode(int playMode) {
+        this.playMode = playMode;
     }
 
 
