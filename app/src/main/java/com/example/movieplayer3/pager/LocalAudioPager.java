@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.movieplayer3.R;
+import com.example.movieplayer3.activity.LocalMusicPlayerActivity;
 import com.example.movieplayer3.activity.LocalVideoPlayerActivity;
 import com.example.movieplayer3.adapter.LocalVideoAdapter;
 import com.example.movieplayer3.domain.MediaItem;
@@ -42,14 +43,9 @@ public class LocalAudioPager extends BaseFragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Intent intent = new Intent(context,LocalVideoPlayerActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("videoList",list);
-                intent.putExtras(bundle);
+                Intent intent = new Intent(context, LocalMusicPlayerActivity.class);
                 intent.putExtra("position",position);
                 startActivity(intent);
-
             }
         });
 
@@ -71,10 +67,10 @@ public class LocalAudioPager extends BaseFragment {
     @Override
     public void initDatas() {
         super.initDatas();
-        getLocalVideoDatas();
+        getLocalAudioDatas();
     }
 
-    private void getLocalVideoDatas() {
+    private void getLocalAudioDatas() {
         new Thread(){
             public void run(){
                 list = new ArrayList<>();
