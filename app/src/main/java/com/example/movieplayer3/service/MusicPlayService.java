@@ -327,7 +327,7 @@ public class MusicPlayService extends Service {
 
     //获取歌曲路径
     private String getMusicPath() {
-        return "";
+        return mediaItem.getData();
     }
 
     //播放下一个

@@ -35,14 +35,14 @@ public class LyricView extends TextView {
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setAntiAlias(true);
         paint.setTextSize(23);
-        lyrics = new ArrayList<>();
-        for(int i = 0; i < 1000; i++) {
-          Lyric lyric = new Lyric();
-            lyric.setContent(i+"aaaaaaaa"+i);
-            lyric.setDuration(2000);
-            lyric.setTimePoint(2000*i);
-            lyrics.add(lyric);
-        }
+//        lyrics = new ArrayList<>();
+//        for(int i = 0; i < 1000; i++) {
+//          Lyric lyric = new Lyric();
+//            lyric.setContent(i+"aaaaaaaa"+i);
+//            lyric.setDuration(2000);
+//            lyric.setTimePoint(2000*i);
+//            lyrics.add(lyric);
+//        }
         textHeight = paint.getTextSize();
 
     }
@@ -54,12 +54,14 @@ public class LyricView extends TextView {
         width = w;
         height = h;
     }
+
     private int index = 0;
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //canvas.drawText("未搜索到歌词", width / 2, height / 2, paint);
-        if(lyrics != null && lyrics.size()>0) {
+        if (lyrics != null && lyrics.size() > 0) {
             paint.setColor(Color.GREEN);
             String currentContent = lyrics.get(index).getContent();
             canvas.drawText(currentContent, width / 2, height / 2, paint);
@@ -67,11 +69,11 @@ public class LyricView extends TextView {
 
             //绘制上面部分
             paint.setColor(Color.WHITE);
-            float tempY = height/2;
+            float tempY = height / 2;
 
-            for(int i = index -1; i >= 0 ; i--) {
+            for (int i = index - 1; i >= 0; i--) {
                 tempY = tempY - textHeight;
-                if(tempY < 0) {
+                if (tempY < 0) {
                     break;
                 }
                 String preContent = lyrics.get(i).getContent();
@@ -81,38 +83,44 @@ public class LyricView extends TextView {
 
             //绘制下面的部分
 
-            tempY = height/2;
+            tempY = height / 2;
 
-            for(int i = index +1; i < lyrics.size() ; i++) {
+            for (int i = index + 1; i < lyrics.size(); i++) {
                 tempY = tempY + textHeight;
-                if(tempY > height) {
+                if (tempY > height) {
                     break;
                 }
                 String preContent = lyrics.get(i).getContent();
                 canvas.drawText(preContent, width / 2, tempY, paint);
             }
-        }else {
+        } else {
             canvas.drawText("未搜索到歌词", width / 2, height / 2, paint);
         }
     }
 
     public void setShowNextLyric(int currentPosition) {
         this.currentPosition = currentPosition;
-        if(lyrics!= null && lyrics.size()>0) {
-            for(int i = 1; i < lyrics.size(); i++) {
-              if(currentPosition < lyrics.get(i).getTimePoint()) {
-                  if(currentPosition>lyrics.get(i-1).getTimePoint()) {
-                      index = i - 1;
-                      break;
-                  }
-
-              }
+        if (lyrics != null && lyrics.size() > 0) {
+            for (int i = 1; i < lyrics.size(); i++) {
+                if (currentPosition < lyrics.get(i).getTimePoint()) {
+                    index = i - 1;
+                    break;
+                }
+                if(currentPosition > lyrics.get(lyrics.size() -1).getTimePoint()) {
+                    index = lyrics.size() -1;
+                    break;
+                }
             }
 
             invalidate();
         }
 
 
+
+    }
+
+    public void setLysicData(ArrayList<Lyric> lyrics) {
+        this.lyrics = lyrics;
 
     }
 }

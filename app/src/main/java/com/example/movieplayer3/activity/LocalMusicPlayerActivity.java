@@ -26,14 +26,21 @@ import android.widget.TextView;
 
 import com.example.movieplayer3.IMusicPlayService;
 import com.example.movieplayer3.R;
+import com.example.movieplayer3.domain.Lyric;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.service.MusicPlayService;
+import com.example.movieplayer3.utils.LyricsUtils;
 import com.example.movieplayer3.utils.Utils;
 import com.example.movieplayer3.view.LyricView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 
 public class LocalMusicPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -319,12 +326,35 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             duration = service.duration();
             seekbarAudio.setMax(duration);
             setBtnPlayModeImage();
+
+
+            String audioPath = service.getMusicPath();
+            String lyricPath = audioPath.substring(0,audioPath.lastIndexOf("."));
+            File lrc = new File(lyricPath + ".lrc");
+            Log.e("TAG","lrc.exists(.lrc)" + lrc.exists());
+            if(!lrc.exists()) {
+                lrc = new File(lyricPath + ".txt");
+                Log.e("TAG","lrc.exists(.txt)" + lrc.exists());
+            }
+            if(lrc.exists()) {
+                Log.e("TAG","lrc.exists()" + lrc.exists());
+                LyricsUtils lyricsUtils = new LyricsUtils();
+                lyricsUtils.readLyric(lrc);
+                ArrayList<Lyric> lyrics = lyricsUtils.getLyrics();
+                for(int i = 0; i < lyrics.size(); i++) {
+                  Log.e("TAGT",lyrics.get(i).toString());
+                }
+                lyric_view.setLysicData(lyrics);
+                handler.sendEmptyMessage(SHOW_LYRIC);
+
+            }
+
         } catch (RemoteException e) {
             e.printStackTrace();
         }
 
         handler.sendEmptyMessage(UPDATA_PROGRESS);
-        handler.sendEmptyMessage(SHOW_LYRIC);
+
     }
 
     @Override
