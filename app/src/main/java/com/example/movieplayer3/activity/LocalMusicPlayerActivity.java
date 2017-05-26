@@ -29,6 +29,7 @@ import com.example.movieplayer3.R;
 import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.service.MusicPlayService;
 import com.example.movieplayer3.utils.Utils;
+import com.example.movieplayer3.view.LyricView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -37,6 +38,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public class LocalMusicPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int UPDATA_PROGRESS = 1;
+    private static final int SHOW_LYRIC = 2;
     private RelativeLayout rlTop;
     private ImageView ivIcon;
     private TextView tvArtist;
@@ -51,6 +53,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     private Button btnLyric;
     private IMusicPlayService service;
     private Utils utils;
+    private LyricView lyric_view;
     //private MyReceiver receiver;
     private ServiceConnection conn = new ServiceConnection() {
         @Override
@@ -104,6 +107,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         btnStartPause = (Button)findViewById( R.id.btn_start_pause );
         btnNext = (Button)findViewById( R.id.btn_next );
         btnLyric = (Button)findViewById( R.id.btn_lyric );
+        lyric_view = (LyricView)findViewById(R.id.lyric_view);
 
         btnPlaymode.setOnClickListener( this );
         btnPre.setOnClickListener( this );
@@ -214,6 +218,19 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
                     sendEmptyMessageDelayed(UPDATA_PROGRESS,1000);
 
                     break;
+                case SHOW_LYRIC:
+                    try {
+                        currentPosition = service.currentPosition();
+                        lyric_view.setShowNextLyric(currentPosition);
+
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    removeMessages(SHOW_LYRIC);
+                    sendEmptyMessage(SHOW_LYRIC);
+                    break;
             }
 
         }
@@ -307,6 +324,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         }
 
         handler.sendEmptyMessage(UPDATA_PROGRESS);
+        handler.sendEmptyMessage(SHOW_LYRIC);
     }
 
     @Override

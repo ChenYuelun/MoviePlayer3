@@ -22,6 +22,7 @@ public class LyricView extends TextView {
     private Paint paint;
     private ArrayList<Lyric> lyrics;
     private float textHeight;
+    private int currentPosition;
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,7 +69,7 @@ public class LyricView extends TextView {
             paint.setColor(Color.WHITE);
             float tempY = height/2;
 
-            for(int i = index -1; i > 0 ; i--) {
+            for(int i = index -1; i >= 0 ; i--) {
                 tempY = tempY - textHeight;
                 if(tempY < 0) {
                     break;
@@ -93,5 +94,25 @@ public class LyricView extends TextView {
         }else {
             canvas.drawText("未搜索到歌词", width / 2, height / 2, paint);
         }
+    }
+
+    public void setShowNextLyric(int currentPosition) {
+        this.currentPosition = currentPosition;
+        if(lyrics!= null && lyrics.size()>0) {
+            for(int i = 1; i < lyrics.size(); i++) {
+              if(currentPosition < lyrics.get(i).getTimePoint()) {
+                  if(currentPosition>lyrics.get(i-1).getTimePoint()) {
+                      index = i - 1;
+                      break;
+                  }
+
+              }
+            }
+
+            invalidate();
+        }
+
+
+
     }
 }
