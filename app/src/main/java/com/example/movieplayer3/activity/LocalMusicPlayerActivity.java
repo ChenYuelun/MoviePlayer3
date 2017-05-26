@@ -26,8 +26,13 @@ import android.widget.TextView;
 
 import com.example.movieplayer3.IMusicPlayService;
 import com.example.movieplayer3.R;
+import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.service.MusicPlayService;
 import com.example.movieplayer3.utils.Utils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class LocalMusicPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -46,7 +51,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     private Button btnLyric;
     private IMusicPlayService service;
     private Utils utils;
-    private MyReceiver receiver;
+    //private MyReceiver receiver;
     private ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
@@ -56,7 +61,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
                 try {
                     Log.e("TAG","position" + position);
                     if(fromNotification) {
-                        setViewData();
+                        setViewData(null);
                     }else {
                         service.playMusic(position);
                     }
@@ -222,6 +227,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         initData();
         startAndBindService();
         setListener();
+        EventBus.getDefault().register(this);
 
     }
 
@@ -252,10 +258,10 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
 
     private void initData() {
         utils = new Utils();
-        receiver = new MyReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MusicPlayService.ONPREPARED);
-        registerReceiver(receiver,filter);
+//        receiver = new MyReceiver();
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(MusicPlayService.ONPREPARED);
+//        registerReceiver(receiver,filter);
 
 
     }
@@ -274,21 +280,22 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         startService(intent);
     }
 
-    class MyReceiver extends BroadcastReceiver{
+//    class MyReceiver extends BroadcastReceiver{
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            switch (intent.getAction()){
+//                case MusicPlayService.ONPREPARED:
+//                    setViewData();
+//                    break;
+//
+//
+//            }
+//        }
+//    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
-                case MusicPlayService.ONPREPARED:
-                    setViewData();
-                    break;
-
-
-            }
-        }
-    }
-
-    private void setViewData() {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void setViewData(MediaItem main) {
         try {
             tvArtist.setText(service.getArtistName());
             tvAudioname.setText(service.getMusicName());
@@ -312,10 +319,12 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             unbindService(conn);
             conn = null;
         }
-        if(receiver!= null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
+//        if(receiver!= null) {
+//            unregisterReceiver(receiver);
+//            receiver = null;
+//        }
+
+        EventBus.getDefault().unregister(this);
         
         super.onDestroy();
         

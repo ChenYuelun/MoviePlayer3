@@ -25,6 +25,8 @@ import com.example.movieplayer3.R;
 import com.example.movieplayer3.activity.LocalMusicPlayerActivity;
 import com.example.movieplayer3.domain.MediaItem;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -211,7 +213,8 @@ public class MusicPlayService extends Service {
     private class MyOnPreparedListener implements MediaPlayer.OnPreparedListener {
         @Override
         public void onPrepared(MediaPlayer mp) {
-            sendChange(ONPREPARED);
+//            sendChange(ONPREPARED);
+            EventBus.getDefault().post(mediaItem);
             start();
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Intent intent = new Intent(MusicPlayService.this, LocalMusicPlayerActivity.class);
@@ -246,15 +249,12 @@ public class MusicPlayService extends Service {
                 super.onCallStateChanged(state, incomingNumber);
                 switch (state) {
                     case TelephonyManager.CALL_STATE_IDLE:
-                        Log.e("TAG", "空闲状态");
                         mediaPlayer.start();
                         break;
                     case TelephonyManager.CALL_STATE_RINGING:
-                        Log.e("TAG", "响铃状态");
                         mediaPlayer.pause();
                         break;
                     case TelephonyManager.CALL_STATE_OFFHOOK:
-                        Log.e("TAG", "通话状态");
                         mediaPlayer.pause();
                         break;
                 }
@@ -265,11 +265,11 @@ public class MusicPlayService extends Service {
     }
 
 
-    private void sendChange(String action) {
-        Intent intent = new Intent(action);
-        sendBroadcast(intent);
-
-    }
+//    private void sendChange(String action) {
+//        Intent intent = new Intent(action);
+//        sendBroadcast(intent);
+//
+//    }
 
     private class MyOnErrorListener implements MediaPlayer.OnErrorListener {
         @Override
