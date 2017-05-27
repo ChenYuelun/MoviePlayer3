@@ -214,8 +214,8 @@ public class MusicPlayService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
 //            sendChange(ONPREPARED);
-            EventBus.getDefault().post(mediaItem);
             start();
+            EventBus.getDefault().post(mediaItem);
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Intent intent = new Intent(MusicPlayService.this, LocalMusicPlayerActivity.class);
             intent.putExtra("fromNotification",true);

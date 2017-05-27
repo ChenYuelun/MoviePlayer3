@@ -5,11 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.example.movieplayer3.domain.Lyric;
 
-import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 
 /**
@@ -22,7 +22,9 @@ public class LyricView extends TextView {
     private Paint paint;
     private ArrayList<Lyric> lyrics;
     private float textHeight;
-    private int currentPosition;
+    private float currentPosition;
+    private float duration;
+    private float timePoint;
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,7 +63,26 @@ public class LyricView extends TextView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //canvas.drawText("未搜索到歌词", width / 2, height / 2, paint);
+
         if (lyrics != null && lyrics.size() > 0) {
+            if(index != lyrics.size()-1) {
+                float push = 0;
+
+                if (duration == 0) {
+                    push = 0;
+                } else {
+                    // 这一句花的时间： 这一句休眠时间  =  这一句要移动的距离：总距离(行高)
+                    //这一句要移动的距离 = （这一句花的时间/这一句休眠时间） * 总距离(行高)
+                    push = ((currentPosition - timePoint) / duration) * textHeight;
+                    Log.e("TAG","push" + push);
+                }
+
+                canvas.translate(0, -push);
+
+            }
+
+
+
             paint.setColor(Color.GREEN);
             String currentContent = lyrics.get(index).getContent();
             canvas.drawText(currentContent, width / 2, height / 2, paint);
@@ -100,21 +121,26 @@ public class LyricView extends TextView {
 
     public void setShowNextLyric(int currentPosition) {
         this.currentPosition = currentPosition;
+        Log.e("TAG","currentPosition==" + currentPosition);
         if (lyrics != null && lyrics.size() > 0) {
             for (int i = 1; i < lyrics.size(); i++) {
                 if (currentPosition < lyrics.get(i).getTimePoint()) {
                     index = i - 1;
+                    duration = lyrics.get(index).getDuration();
+                    Log.e("TAG","duration==" + duration);
+                    timePoint = lyrics.get(index).getTimePoint();
+                    Log.e("TAG","duration==" + duration);
                     break;
                 }
-                if(currentPosition > lyrics.get(lyrics.size() -1).getTimePoint()) {
-                    index = lyrics.size() -1;
+                if (currentPosition > lyrics.get(lyrics.size() - 1).getTimePoint()) {
+                    index = lyrics.size() - 1;
+
                     break;
                 }
             }
 
             invalidate();
         }
-
 
 
     }
