@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.example.movieplayer3.domain.Lyric;
+import com.example.movieplayer3.utils.DensityUtil;
 
 import java.util.ArrayList;
 
@@ -17,6 +18,7 @@ import java.util.ArrayList;
  */
 
 public class LyricView extends TextView {
+    private final Context context;
     private int width;
     private int height;
     private Paint paint;
@@ -28,6 +30,7 @@ public class LyricView extends TextView {
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         initData();
     }
 
@@ -36,7 +39,7 @@ public class LyricView extends TextView {
         paint.setColor(Color.GREEN);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setAntiAlias(true);
-        paint.setTextSize(23);
+        paint.setTextSize(DensityUtil.dip2px(context,18));
 //        lyrics = new ArrayList<>();
 //        for(int i = 0; i < 1000; i++) {
 //          Lyric lyric = new Lyric();
@@ -45,7 +48,7 @@ public class LyricView extends TextView {
 //            lyric.setTimePoint(2000*i);
 //            lyrics.add(lyric);
 //        }
-        textHeight = paint.getTextSize();
+        textHeight = DensityUtil.dip2px(context,25);
 
     }
 
@@ -121,15 +124,12 @@ public class LyricView extends TextView {
 
     public void setShowNextLyric(int currentPosition) {
         this.currentPosition = currentPosition;
-        Log.e("TAG","currentPosition==" + currentPosition);
         if (lyrics != null && lyrics.size() > 0) {
             for (int i = 1; i < lyrics.size(); i++) {
                 if (currentPosition < lyrics.get(i).getTimePoint()) {
                     index = i - 1;
                     duration = lyrics.get(index).getDuration();
-                    Log.e("TAG","duration==" + duration);
                     timePoint = lyrics.get(index).getTimePoint();
-                    Log.e("TAG","duration==" + duration);
                     break;
                 }
                 if (currentPosition > lyrics.get(lyrics.size() - 1).getTimePoint()) {
@@ -141,6 +141,7 @@ public class LyricView extends TextView {
 
             invalidate();
         }
+
 
 
     }

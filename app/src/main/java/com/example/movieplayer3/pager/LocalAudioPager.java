@@ -83,13 +83,17 @@ public class LocalAudioPager extends BaseFragment {
                 Cursor cursor = resolver.query(uri, objs, null, null, null);
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
-                        String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
                         long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-                        long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
-                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                        Log.e("TAG", "name==" + name + ",duration==" + duration + ",data===" + data);
+                        if(duration>10*1000) {
+                            String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                            long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
+                            String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                            Log.e("TAG", "name==" + name + ",duration==" + duration + ",data===" + data);
 
-                        list.add(new MediaItem(name, duration, size, data));
+                            list.add(new MediaItem(name, duration, size, data));
+
+                        }
+
                     }
 
                     handler.sendEmptyMessage(1);

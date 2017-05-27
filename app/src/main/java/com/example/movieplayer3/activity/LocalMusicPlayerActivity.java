@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.audiofx.Visualizer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -31,6 +32,7 @@ import com.example.movieplayer3.domain.MediaItem;
 import com.example.movieplayer3.service.MusicPlayService;
 import com.example.movieplayer3.utils.LyricsUtils;
 import com.example.movieplayer3.utils.Utils;
+import com.example.movieplayer3.view.BaseVisualizerView;
 import com.example.movieplayer3.view.LyricView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -61,6 +63,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     private IMusicPlayService service;
     private Utils utils;
     private LyricView lyric_view;
+    private BaseVisualizerView visualizerview;
     //private MyReceiver receiver;
     private ServiceConnection conn = new ServiceConnection() {
         @Override
@@ -90,6 +93,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
     private int duration;
     private int currentPosition;
     private boolean fromNotification;
+    private Visualizer mVisualizer;
 
     /**
      * Find the Views in the layout<br />
@@ -115,6 +119,7 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         btnNext = (Button)findViewById( R.id.btn_next );
         btnLyric = (Button)findViewById( R.id.btn_lyric );
         lyric_view = (LyricView)findViewById(R.id.lyric_view);
+        visualizerview = (BaseVisualizerView)findViewById(R.id.visualizerview);
 
         btnPlaymode.setOnClickListener( this );
         btnPre.setOnClickListener( this );
@@ -327,7 +332,6 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
             seekbarAudio.setMax(duration);
             setBtnPlayModeImage();
 
-
             String audioPath = service.getMusicPath();
             String lyricPath = audioPath.substring(0,audioPath.lastIndexOf("."));
             File lrc = new File(lyricPath + ".lrc");
@@ -354,8 +358,35 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
         }
 
         handler.sendEmptyMessage(UPDATA_PROGRESS);
+        //显示音乐频谱
+        setupVisualizerFxAndUi();
 
     }
+
+    private void setupVisualizerFxAndUi() {
+        int audioSessionid = 0;
+        try {
+            audioSessionid = service.getAudioSessionId();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        System.out.println("audioSessionid==" + audioSessionid);
+        mVisualizer = new Visualizer(audioSessionid);
+        // 参数内必须是2的位数
+        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+        // 设置允许波形表示，并且捕获它
+        visualizerview.setVisualizer(mVisualizer);
+        mVisualizer.setEnabled(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing()) {
+            mVisualizer.release();
+        }
+    }
+
 
     @Override
     protected void onDestroy() {

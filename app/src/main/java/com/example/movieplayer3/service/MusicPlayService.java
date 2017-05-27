@@ -116,6 +116,11 @@ public class MusicPlayService extends Service {
         public int getPlayMode() throws RemoteException {
             return service.getPlayMode();
         }
+
+        @Override
+        public int getAudioSessionId() throws RemoteException {
+            return mediaPlayer.getAudioSessionId();
+        }
     };
 
 
@@ -163,14 +168,18 @@ public class MusicPlayService extends Service {
                 Cursor cursor = resolver.query(uri, objs, null, null, null);
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
-                        String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
                         long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-                        long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
-                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                        String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                        Log.e("TAG", "name==" + name + ",duration==" + duration + ",data===" + data);
+                        if(duration > 10*1000) {
+                            String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                            long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE));
+                            String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                            Log.e("TAG", "name==" + name + ",duration==" + duration + ",data===" + data);
 
-                        list.add(new MediaItem(name, duration, size, data,artist));
+                            list.add(new MediaItem(name, duration, size, data,artist));
+
+                        }
+
                     }
 
                     cursor.close();
@@ -214,8 +223,8 @@ public class MusicPlayService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
 //            sendChange(ONPREPARED);
-            start();
             EventBus.getDefault().post(mediaItem);
+            start();
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Intent intent = new Intent(MusicPlayService.this, LocalMusicPlayerActivity.class);
             intent.putExtra("fromNotification",true);
