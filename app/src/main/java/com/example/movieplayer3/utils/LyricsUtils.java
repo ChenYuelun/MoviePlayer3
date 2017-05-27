@@ -88,7 +88,7 @@ public class LyricsUtils {
                 pos2 = content.indexOf("]");
                 if (pos1 == 0 && pos2 != -1) {
                     timeLongs = new long[getCountTags(line)];
-                    timeStr = line.substring(pos1 + 1, pos2);
+                    timeStr = content.substring(pos1 + 1, pos2);
                     timeLongs[i] = str2Long(timeStr);
                     if (timeLongs[i] == -1) {
                         return;
