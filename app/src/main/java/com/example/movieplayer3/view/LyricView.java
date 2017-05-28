@@ -77,7 +77,6 @@ public class LyricView extends TextView {
                     // 这一句花的时间： 这一句休眠时间  =  这一句要移动的距离：总距离(行高)
                     //这一句要移动的距离 = （这一句花的时间/这一句休眠时间） * 总距离(行高)
                     push = ((currentPosition - timePoint) / duration) * textHeight;
-                    Log.e("TAG","push" + push);
                 }
 
                 canvas.translate(0, -push);

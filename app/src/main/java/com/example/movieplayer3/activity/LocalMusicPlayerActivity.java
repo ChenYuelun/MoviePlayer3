@@ -345,12 +345,14 @@ public class LocalMusicPlayerActivity extends AppCompatActivity implements View.
                 LyricsUtils lyricsUtils = new LyricsUtils();
                 lyricsUtils.readLyric(lrc);
                 ArrayList<Lyric> lyrics = lyricsUtils.getLyrics();
-                for(int i = 0; i < lyrics.size(); i++) {
-                  Log.e("TAGT",lyrics.get(i).toString());
-                }
+//                for(int i = 0; i < lyrics.size(); i++) {
+//                  Log.e("TAGT",lyrics.get(i).toString());
+//                }
                 lyric_view.setLysicData(lyrics);
                 handler.sendEmptyMessage(SHOW_LYRIC);
 
+            }else {
+                lyric_view.setLysicData(null);
             }
 
         } catch (RemoteException e) {

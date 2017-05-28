@@ -1,2 +1,2 @@
-include ':app', ':StartVideoPlayer', ':vitamio'
+include ':app', ':StartVideoPlayer', ':vitamio', ':PhotoView_library'
 include ':speechDemo'

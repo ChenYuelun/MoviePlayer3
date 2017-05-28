@@ -315,6 +315,8 @@
         <service android:name=".service.MusicPlayService" />
 
         <activity android:name=".activity.SearchActivity"></activity>
+
+        <activity android:name=".activity.ShowImageAndGifActivity"></activity>
     </application>
 
 </manifest>

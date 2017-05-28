@@ -1,5 +1,7 @@
 package com.example.movieplayer3;
 
+import android.hardware.SensorManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +15,20 @@ import com.example.movieplayer3.pager.NetVideoPager;
 
 import java.util.ArrayList;
 
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
+
 import static com.example.movieplayer3.R.id.rb_local_video;
 
 public class MainActivity extends AppCompatActivity {
     private RadioGroup rg_main;
     private ArrayList<BaseFragment> fragments;
     private int posotion;
+
+    private Fragment mContent;
+
+    SensorManager sensorManager;
+    JCVideoPlayer.JCAutoFullscreenListener sensorEventListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
         ititFragments();
         rg_main.setOnCheckedChangeListener(new MyOnCheckedChangeListener());
         rg_main.check(rb_local_video);
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorEventListener = new JCVideoPlayer.JCAutoFullscreenListener();
+
     }
 
     private void ititFragments() {
@@ -81,4 +95,22 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(sensorEventListener);
+        JCVideoPlayer.releaseAllVideos();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (JCVideoPlayer.backPress()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
 }
