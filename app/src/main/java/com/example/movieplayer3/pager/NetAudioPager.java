@@ -9,6 +9,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.cjj.MaterialRefreshLayout;
+import com.cjj.MaterialRefreshListener;
 import com.example.movieplayer3.R;
 import com.example.movieplayer3.activity.ShowImageAndGifActivity;
 import com.example.movieplayer3.adapter.NetAudioAdapter;
@@ -34,7 +36,11 @@ import static com.example.movieplayer3.R.id.lv;
  */
 
 public class NetAudioPager extends BaseFragment {
-    private static final String TAG = NetAudioPager.class.getSimpleName();
+    private static final String TAG = "TAG";
+
+    @Bind(R.id.audio_refresh)
+    MaterialRefreshLayout materialRefreshLayout;
+
     @Bind(R.id.listview)
     ListView listview;
     @Bind(R.id.progressbar)
@@ -43,6 +49,7 @@ public class NetAudioPager extends BaseFragment {
     TextView tvNomedia;
     private NetAudioAdapter myAdapter;
     private List<NetAudioBean.ListBean> datas;
+    private boolean isMore;
 
     @Override
     public View initView() {
@@ -66,6 +73,22 @@ public class NetAudioPager extends BaseFragment {
                     }
                 }
 
+            }
+        });
+
+        materialRefreshLayout.setMaterialRefreshListener(new MaterialRefreshListener() {
+            @Override
+            public void onRefresh(final MaterialRefreshLayout materialRefreshLayout) {
+                //refreshing...
+                isMore = false;
+                getDataFromNet();
+            }
+
+            @Override
+            public void onRefreshLoadMore(MaterialRefreshLayout materialRefreshLayout) {
+                //load more refreshing...
+                isMore =  true;
+                getDataFromNet();
             }
         });
 
@@ -111,20 +134,26 @@ public class NetAudioPager extends BaseFragment {
 
     private void processData(String json) {
         NetAudioBean netAudioBean = paraseJons(json);
-//        LogUtil.e(netAudioBean.getList().get(0).getText()+"--------------");
-        datas = netAudioBean.getList();
-        if(datas != null && datas.size() >0){
-            //有视频
-            tvNomedia.setVisibility(View.GONE);
-            //设置适配器
-            myAdapter = new NetAudioAdapter(context,datas);
-            listview.setAdapter(myAdapter);
-        }else{
-            //没有视频
-            tvNomedia.setVisibility(View.VISIBLE);
+        List<NetAudioBean.ListBean> list = netAudioBean.getList();
+        if(!isMore) {
+            datas =list;
+            if(datas != null && datas.size() >0){
+                //有视频
+                tvNomedia.setVisibility(View.GONE);
+                //设置适配器
+                myAdapter = new NetAudioAdapter(context,datas);
+                listview.setAdapter(myAdapter);
+            }else{
+                //没有视频
+                tvNomedia.setVisibility(View.VISIBLE);
+            }
+            progressbar.setVisibility(View.GONE);
+            materialRefreshLayout.finishRefresh();
+        }else {
+            datas.addAll(list);
+            myAdapter.notifyDataSetChanged();
+            materialRefreshLayout.finishRefreshLoadMore();
         }
-
-        progressbar.setVisibility(View.GONE);
 
 
 

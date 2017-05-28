@@ -1,11 +1,14 @@
 package com.example.movieplayer3;
 
 import android.hardware.SensorManager;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.movieplayer3.fragment.BaseFragment;
 import com.example.movieplayer3.pager.LocalAudioPager;
@@ -22,12 +25,13 @@ import static com.example.movieplayer3.R.id.rb_local_video;
 public class MainActivity extends AppCompatActivity {
     private RadioGroup rg_main;
     private ArrayList<BaseFragment> fragments;
-    private int posotion;
+    private int position;
 
     private Fragment mContent;
 
     SensorManager sensorManager;
     JCVideoPlayer.JCAutoFullscreenListener sensorEventListener;
+    private boolean isExit = false;
 
 
     @Override
@@ -57,20 +61,20 @@ public class MainActivity extends AppCompatActivity {
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             switch (checkedId) {
                 case rb_local_video :
-                    posotion = 0;
+                    position = 0;
                     break;
                 case R.id.rb_local_audio :
-                    posotion = 1;
+                    position = 1;
                     break;
                 case R.id.rb_net_audio :
-                    posotion =2;
+                    position =2;
                     break;
                 case R.id.rb_net_video :
-                    posotion = 3;
+                    position = 3;
                     break;
             }
 
-            BaseFragment CurrentFragment = fragments.get(posotion);
+            BaseFragment CurrentFragment = fragments.get(position);
             addFragment(CurrentFragment);
         }
     }
@@ -94,6 +98,29 @@ public class MainActivity extends AppCompatActivity {
             tempFragment = currentFragment;
 
         }
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode ==KeyEvent.KEYCODE_BACK){
+            if(position!= 0){
+                rg_main.check(R.id.rb_local_video);
+                return true;
+            }else if(!isExit){
+                Toast.makeText(MainActivity.this, "再按一次推出软件", Toast.LENGTH_SHORT).show();
+                isExit = true;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isExit = false;
+                    }
+                }, 2000);
+
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 
